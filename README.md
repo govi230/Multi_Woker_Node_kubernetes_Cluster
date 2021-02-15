@@ -10,7 +10,7 @@ Eg-  container_runtime_engine: "docker"
 ### Container Network Interface  
 Right Now only "[flannel](https://github.com/coreos/flannel#flannel)" Container Network Interface is supported by this Role . "**container_netwrok_interface**" variable is available to tell this role which Container Network Interface will used to setup kubernetes cluster . By default this role use "**flannel**" network interface if you don't specify "container_runtime_engine" variable .
 ### Intialize Info  
-To give Initialization Information to Role , it has "**init_info**" vaiable . This variable take multiple Arguments ( Right Now "*pod_network_cidr*" and "*ignore_preflight_errors*" are tested . )
+This Role use "kubeadm" to intilize Kubernetes Cluster .To give Initialization Information to Role , it has "**init_info**" vaiable . This variable take multiple Arguments ( Right Now "*pod_network_cidr*" and "*ignore_preflight_errors*" are tested . )
 - **apiserver_advertise_address**  ->  The IP address the API Server will advertise it's listening on. If not set the default network interface will be used.
 - **apiserver_bind_port**  ->  Port for the API Server to bind to. (default 6443)
 - **apiserver_cert_extra_sans**  ->  Optional extra Subject Alternative Names (SANs) to use for the API Server serving certificate. Can be both IP addresses and DNS names.
