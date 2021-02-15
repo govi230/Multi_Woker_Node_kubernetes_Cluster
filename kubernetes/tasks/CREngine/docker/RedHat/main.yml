@@ -1,0 +1,29 @@
+- block:
+          - name: "Include Task File to install docker"
+            include: "kubernetes/tasks/CREngine/{{ container_runtime_engine}}/{{ ansible_facts.distribution }}/type_1.yml"
+  rescue:
+          - name: "Include Repo Creation Task for docker"
+            include: "repo_creation.yml"
+            when: docker_pkg_status.rc == 1
+
+- block:
+          - name: "Start and Enable Docker"
+            service:
+                    name: "docker"
+                    state: started
+                    enabled: True
+  rescue:
+          - name: "Clear Caches"
+            shell: "echo 3 > /proc/sys/vm/drop_caches"
+  always:
+          - name: "Change Driver 'cgroupfs' to 'systemd' for docker"
+            copy:
+                    src: "daemon.json"
+                    dest: "/etc/docker/daemon.json"
+            register: docker_conf_status
+          - name: "Reload Docker Service If any changes occur"
+            service:
+                    name: "docker"
+                    state: restarted
+                    enabled: True
+            when: docker_conf_status.changed == True

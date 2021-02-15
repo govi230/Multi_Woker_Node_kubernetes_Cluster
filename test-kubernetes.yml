@@ -1,0 +1,17 @@
+- hosts: kubernetes_cluster
+  roles:
+          - role: "kubernetes"
+            vars:
+                    container_runtime_engine: "docker"
+                    container_network_interface: "flannel"
+                    init_info:
+                            pod_network_cidr: "10.240.0.0/16"
+                            ignore_preflight_errors:
+                                    - "Mem"
+                                    - "NumCPU"
+
+- hosts: localhost
+  tasks:
+          - include_role:
+                  name: "kubernetes"
+                  tasks_from: "clean_local"

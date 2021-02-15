@@ -1,0 +1,21 @@
+- name: "Enable Briging"
+  blockinfile:
+          block: |
+                  net.bridge.bridge-nf-call-ip6tables = 1
+                  net.bridge.bridge-nf-call-iptables = 1
+          path: "{{ bridging_file_path_for_k8s }}"
+          create: True
+          marker: "# {mark} Enable Kubernetes Bridging"
+          state: present
+  register: bridge_status
+
+- name: "restart sysctl"
+  command: "sysctl --system"
+  when: bridge_status.changed == True
+
+- include_vars: "kubernetes/vars/token.json"
+- debug:
+        var: join_command
+
+- name: "Join Master Node"
+  command: "{{ join_command }}"

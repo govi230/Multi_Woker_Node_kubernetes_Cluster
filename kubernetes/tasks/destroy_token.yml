@@ -1,0 +1,5 @@
+- name: "Destroy Token On Master"
+  kubeadm_token:
+          token: "{{ token_status.token_info.token }}"
+          action: delete
+  when: ansible_facts.default_ipv4.address in groups.private_kubernetes_master

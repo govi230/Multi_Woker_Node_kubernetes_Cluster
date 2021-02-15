@@ -1,0 +1,12 @@
+- name: "Make '$HOME/.kube' Directory For kubectl"
+  file:
+          path: "$HOME/.kube"
+          state: directory
+
+- name: "Copy 'kubeconfig' file inside '$HOME/.kube' Directory"
+  copy:
+          src: "admin.conf"
+          dest: "$HOME/.kube/config"
+
+- name: "Change kubeconfig file owner & group to current user"
+  shell: "chown {{ ansible_facts.user_uid }}:{{ ansible_facts.user_uid }} $HOME/.kube/config"

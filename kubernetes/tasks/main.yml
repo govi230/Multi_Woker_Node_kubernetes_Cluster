@@ -1,0 +1,9 @@
+---
+# tasks file for kubernetes
+#
+#
+- name: "Include {{ container_runtime_engine }} Installation Task Files"
+  include: "CREngine/{{ container_runtime_engine }}/{{ ansible_facts.distribution }}/main.yml"
+
+- name: "Install Kubernetes"
+  include: "{{ ansible_facts.distribution }}/main.yml"

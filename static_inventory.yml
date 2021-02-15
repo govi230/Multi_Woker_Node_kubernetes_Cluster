@@ -1,0 +1,12 @@
+- hosts: localhost
+  tasks:
+          - name: "Create Static Inventory"
+            template:
+                    src: "aws/inventory/static/hosts"
+                    dest: "hosts"
+          - name: "Update Inventory Path in Ansible Configration File"
+            lineinfile:
+                    path: "ansible.cfg"
+                    line: "inventory = hosts"
+                    regexp: "inventory = aws/inventory/dynamic"
+                    state: present

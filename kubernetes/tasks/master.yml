@@ -1,0 +1,39 @@
+- name: "Download Some Docker Images for Kubernetes"
+  command: "kubeadm config images pull"
+
+- name: "Initialize Kubernetes Master"
+  kubeadm_init: "{{ init_info }}"
+  register: init_status
+  ignore_errors: true
+
+- name: "Fetch admin kubeconfig file"
+  fetch:
+          src: "/etc/kubernetes/admin.conf"
+          dest: "kubernetes/files/"
+          flat: yes
+
+- name: "Configure Client on Matser"
+  include: "client.yml"
+
+- name: "Create Intermidate Token"
+  kubeadm_token:
+          description: "good"
+          action: create
+  register: token_status
+  ignore_errors: true
+
+- debug:
+        var: token_status
+
+- name: "Include 'Recreation Token' Tasks File"
+  include: "recreate_token.yml"
+  when: token_status.changed == False
+
+- blockinfile:
+        block: "{{ token_status }}"
+        path: "kubernetes/vars/token.json"
+        create: True
+  delegate_to: localhost
+
+- name: "Configure Container Network Interface"
+  include: "CNInterface/{{ container_network_interface }}.yml"

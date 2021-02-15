@@ -1,0 +1,62 @@
+- hosts: localhost
+  vars_files:
+          - aws_cred.yml
+  tasks:
+          - name: "Create Security group which is allowing ALL"
+            amazon.aws.ec2_group:
+                    region: "ap-south-1"
+                    name: "kube-secure"
+                    description: "Kubernetes Cluster"
+                    aws_secret_key: "{{ aws_secret_access_key }}"
+                    aws_access_key: "{{ aws_access_key_id }}"
+                    rules:
+                            - proto: "all"
+                              cidr_ip: "0.0.0.0/0"
+            register: sg_status
+
+          - name: "Launch AWS EC2 Instance For Master"
+            amazon.aws.ec2:
+                    aws_access_key: "{{ aws_access_key_id }}"
+                    aws_secret_key: "{{ aws_secret_access_key }}"
+                    key_name: "hello"
+                    region: "ap-south-1"
+                    instance_type: "t2.micro"
+                    image: "ami-08e0ca9924195beba"
+                    wait: yes
+                    group_id: "{{ sg_status.group_id }}"
+                    count: 1
+            register: master
+
+          - name: "Give Tag key - kubernetes , value - master to Master Node"
+            amazon.aws.ec2_tag:
+                    aws_access_key: "{{ aws_access_key_id }}"
+                    aws_secret_key: "{{ aws_secret_access_key }}"
+                    region: "ap-south-1"
+                    resource: "{{ item }}"
+                    tags:
+                            kubernetes: "master"
+                    state: present
+            loop: "{{ master.instance_ids }}"
+
+          - name: "Launch AWS EC2 Instance For Slave"
+            amazon.aws.ec2:
+                    aws_access_key: "{{ aws_access_key_id }}"
+                    aws_secret_key: "{{ aws_secret_access_key }}"
+                    key_name: "hello"
+                    region: "ap-south-1"
+                    instance_type: "t2.micro"
+                    image: "ami-08e0ca9924195beba"
+                    wait: yes
+                    group_id: "{{ sg_status.group_id }}"
+                    count: 2
+            register: slave
+          - name: "Give Tag key - kubernetes , value - slave to Slave Nodes"
+            amazon.aws.ec2_tag:
+                    aws_access_key: "{{ aws_access_key_id }}"
+                    aws_secret_key: "{{ aws_secret_access_key }}"
+                    region: "ap-south-1"
+                    resource: "{{ item }}"
+                    tags:
+                            kubernetes: "slave"
+                    state: present
+            loop: "{{ slave.instance_ids }}"

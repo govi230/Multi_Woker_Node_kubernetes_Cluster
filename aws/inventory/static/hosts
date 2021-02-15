@@ -1,0 +1,32 @@
+[kubernetes_master]
+{% if 'tag_kubernetes_master' in groups.keys() %}
+{% for host in groups.tag_kubernetes_master %}
+{{ host }}
+{% endfor %}
+{% endif %}
+
+[kubernetes_slave]
+{% if 'tag_kubernetes_slave' in groups.keys() %}
+{% for host in groups.tag_kubernetes_slave %}
+{{ host }}
+{% endfor %}
+{% endif %}
+
+
+[kubernetes_cluster:children]
+kubernetes_master
+kubernetes_slave
+
+[private_kubernetes_master]
+{% if 'tag_kubernetes_master' in groups.keys() %}
+{% for host in groups.tag_kubernetes_master %}
+{{ hostvars[host]['ec2_private_ip_address'] }}
+{% endfor %}
+{% endif %}
+
+[private_kubernetes_slave]
+{% if 'tag_kubernetes_slave' in groups.keys() %}
+{% for host in groups.tag_kubernetes_slave %}
+{{ hostvars[host]['ec2_private_ip_address'] }}
+{% endfor %}
+{% endif %}
